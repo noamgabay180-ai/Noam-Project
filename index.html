@@ -171,7 +171,7 @@
     <h1>בדיקת האוטומציה – ליד חדש</h1>
     <p class="subtitle">
       השאירו פרטים והלידי ייכנס ישירות אל תהליך<br>
-      הh8n שלכם.
+      ה-n8n שלכם.
     </p>
 
     <form id="leadForm">
@@ -204,7 +204,7 @@
   </div>
 
   <script>
-const WEBHOOK_URL = "https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a20-a04c-40d096fb25ac/gksbl24";
+    const WEBHOOK_URL = "https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a20-a04c-40d096fb25ac/gksbl24";
 
     const form = document.getElementById("leadForm");
     const submitBtn = document.getElementById("submitBtn");
@@ -213,11 +213,10 @@ const WEBHOOK_URL = "https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const payload = {
-        fullName: document.getElementById("fullName").value.trim(),
-        email: document.getElementById("email").value.trim(),
-        phone: document.getElementById("phone").value.trim()
-      };
+      const params = new URLSearchParams();
+      params.append("fullName", document.getElementById("fullName").value.trim());
+      params.append("email", document.getElementById("email").value.trim());
+      params.append("phone", document.getElementById("phone").value.trim());
 
       submitBtn.disabled = true;
       statusMessage.className = "status-message";
@@ -226,8 +225,7 @@ const WEBHOOK_URL = "https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a
       try {
         const response = await fetch(WEBHOOK_URL, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: params
         });
 
         if (!response.ok) {
