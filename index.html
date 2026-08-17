@@ -148,12 +148,6 @@
     background: #e7f8ee;
     color: #1e8a4c;
   }
-
-  .status-message.error {
-    display: block;
-    background: #fdecec;
-    color: #d33;
-  }
 </style>
 </head>
 <body>
@@ -174,7 +168,15 @@
       ה-n8n שלכם.
     </p>
 
-    <form id="leadForm">
+    <!--
+      שליחת טופס קלאסית ליעד iframe מוסתר.
+      זו שיטה שאינה כפופה למגבלות CORS בכלל - הדפדפן פשוט מבצע ניווט POST רגיל.
+    -->
+    <form id="leadForm"
+          action="https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a20-a04c-40d096fb25ac/gksbl24"
+          method="POST"
+          target="hidden_iframe">
+
       <div class="field">
         <label for="fullName">שם מלא</label>
         <input type="text" id="fullName" name="fullName" placeholder="נועם" required>
@@ -197,50 +199,35 @@
         </svg>
       </button>
 
-      <div class="status-message" id="statusMessage"></div>
+      <div class="status-message" id="statusMessage">הפרטים נשלחו בהצלחה!</div>
     </form>
+
+    <iframe name="hidden_iframe" style="display:none;"></iframe>
 
     <div class="footnote">השליחה נכנסת ישירות אל תהליך האוטומציה שלכם.</div>
   </div>
 
   <script>
-    const WEBHOOK_URL = "https://n8n.srv1664158.hstgr.cloud/webhook/7de0fff3-5477-4a20-a04c-40d096fb25ac/gksbl24";
-
     const form = document.getElementById("leadForm");
     const submitBtn = document.getElementById("submitBtn");
     const statusMessage = document.getElementById("statusMessage");
+    const iframe = document.querySelector('iframe[name="hidden_iframe"]');
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    let submittedOnce = false;
 
-      const params = new URLSearchParams();
-      params.append("fullName", document.getElementById("fullName").value.trim());
-      params.append("email", document.getElementById("email").value.trim());
-      params.append("phone", document.getElementById("phone").value.trim());
+    iframe.addEventListener("load", () => {
+      if (!submittedOnce) return; // מתעלם מהטעינה הראשונית הריקה של ה-iframe
+      statusMessage.style.display = "block";
+      submitBtn.disabled = false;
+      form.reset();
+      submittedOnce = false;
+    });
 
+    form.addEventListener("submit", () => {
+      submittedOnce = true;
       submitBtn.disabled = true;
-      statusMessage.className = "status-message";
-      statusMessage.textContent = "";
-
-      try {
-        const response = await fetch(WEBHOOK_URL, {
-          method: "POST",
-          body: params
-        });
-
-        if (!response.ok) {
-          throw new Error("Request failed with status " + response.status);
-        }
-
-        statusMessage.className = "status-message success";
-        statusMessage.textContent = "הפרטים נשלחו בהצלחה!";
-        form.reset();
-      } catch (err) {
-        statusMessage.className = "status-message error";
-        statusMessage.textContent = "לא הצלחנו לשלוח כרגע. אפשר לנסות שוב בעוד רגע.";
-      } finally {
-        submitBtn.disabled = false;
-      }
+      statusMessage.style.display = "none";
+      // לא קוראים e.preventDefault() - נותנים לטופס להישלח באמת אל ה-iframe
     });
   </script>
 </body>
